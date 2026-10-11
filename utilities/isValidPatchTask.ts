@@ -1,6 +1,6 @@
 import type { PatchTask, ValidationResult } from '../types.ts'
 
-export function isValidPatchTask(data: unknown): ValidationResult {
+export function isValidPatchTask(data: unknown): ValidationResult<PatchTask> {
 
 
 

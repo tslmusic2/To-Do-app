@@ -7,8 +7,10 @@ export type Task = {
     priority: 'low' | 'medium' | 'high'
   }
 
+export type PostTask = Omit<Task, 'id' | 'completed'>
+
 export type PatchTask = Partial<Omit<Task, 'id'>>
 
-export type ValidationResult = 
-  {valid: true; data: PatchTask} |
-  {valid: false; message: string }
+export type ValidationResult<T> = 
+  { valid: true; data: T } |
+  { valid: false; message: string }

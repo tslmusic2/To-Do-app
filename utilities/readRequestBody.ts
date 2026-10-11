@@ -1,4 +1,6 @@
-export async function readRequestBody(req) {
+import type { IncomingMessage } from 'node:http'
+
+export async function readRequestBody(req: IncomingMessage): Promise<unknown> {
 
         let body = ''
 

@@ -7,6 +7,7 @@ import { readRequestBody } from './utilities/readRequestBody.js'
 import type { Task, PatchTask } from './types.ts'
 import { isValidTaskList, isValidTask } from './utilities/isValidTask.ts'
 import { isValidPatchTask } from './utilities/isValidPatchTask.ts'
+import { isValidPostTask } from './utilities/isValidPostTask.ts'
 
 
 const PORT = 8003
@@ -53,17 +54,25 @@ console.log(req.method, req.url)
             try {
 
                   const parsedBody = await readRequestBody(req)
-                  const {task, priority} = parsedBody
+                  const validationResult = isValidPostTask(parsedBody)
+                  if(!validationResult.valid) {
+                        return sendJson(res, 400, {message: validationResult.message})
+                  }
+
+
+                  const {task, priority} = validationResult.data
 
 
 
                   const tasksListFile = await fs.readFile(tasksFilePath, 'utf8')
-                  const parsedTasksListFile = JSON.parse(tasksListFile)
-
+                  const parsedTasksListFile: unknown = JSON.parse(tasksListFile)
+                  if (!isValidTaskList(parsedTasksListFile)) {
+                        return sendJson(res, 500, {message: 'Invalid task data'})
+                  }
 
                   const newID = parsedTasksListFile.length > 0 ? Math.max(...parsedTasksListFile.map(task => task.id)) + 1 : 1
 
-                  const newIdObj = {
+                  const newIdObj: Task = {
                         id: newID,
                         task: task,
                         completed: false,
@@ -75,7 +84,7 @@ console.log(req.method, req.url)
 
                   await fs.writeFile(tasksFilePath, JSON.stringify(parsedTasksListFile, null, 2), 'utf8')
 
-                  return sendJson(res, 200, {message: 'Your task was succesfully added'})
+                  return sendJson(res, 201, {message: 'Your task was succesfully added', task: newIdObj})
 
 
             } catch(err) {
@@ -94,7 +103,6 @@ console.log(req.method, req.url)
 
                   const validationResult = isValidPatchTask(parsedReqBody)
                   if (!validationResult.valid) {
-                        
                         return sendJson(res, 400, {message: validationResult.message})
                   }
 
